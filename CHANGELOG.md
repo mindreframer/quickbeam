@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Add x86-64 and ARM64 musl precompiled NIFs, with Alpine smoke tests in the release workflow.
+
 ## 0.11.2 - 2026-09-30
 
 ### Changed

@@ -3,6 +3,10 @@ defmodule QuickBEAM.Native.Platform do
 
   defstruct [:family, :lexbor_port, :wamr_platform]
 
+  @version Mix.Project.config()[:version]
+  @upstream_release_url "https://github.com/elixir-volt/quickbeam/releases/download/v#{@version}"
+  @fork_release_url "https://github.com/mindreframer/quickbeam/releases/download/v#{@version}"
+
   @type family :: :linux | :macos | :windows
   @type os_type :: {:unix | :win32, atom()}
   @type t :: %__MODULE__{
@@ -13,6 +17,20 @@ defmodule QuickBEAM.Native.Platform do
 
   @spec current() :: t()
   def current, do: from_os_type(:os.type())
+
+  @doc false
+  @spec artifact_url(String.t()) :: String.t()
+  def artifact_url(filename) do
+    # Keep established targets on upstream artifacts while Alpine support is
+    # maintained in the fork. This can return to one base URL once upstream
+    # publishes musl artifacts.
+    base_url =
+      if String.contains?(filename, "-linux-musl."),
+        do: @fork_release_url,
+        else: @upstream_release_url
+
+    "#{base_url}/#{filename}"
+  end
 
   @spec from_os_type(os_type()) :: t()
   def from_os_type({:win32, _name}) do
