@@ -21,6 +21,40 @@ Windows. Source builds require Zig 0.16 and default to the build machine's CPU;
 set `QUICKBEAM_CPU=baseline` alongside `QUICKBEAM_BUILD=1` for a portable build.
 When changing CPU or optimization settings, force recompilation with `mix compile --force`.
 
+### Alpine fork
+
+The Alpine binaries are available directly from the maintained Git fork; a Hex
+publication is not required:
+
+```elixir
+def deps do
+  [
+    {:quickbeam,
+     git: "https://github.com/mindreframer/quickbeam.git",
+     branch: "master",
+     override: true}
+  ]
+end
+```
+
+The lockfile pins the resolved Git commit. Commit `mix.lock` for reproducible
+builds.
+
+OXC does not publish native musl artifacts for every module and architecture.
+On Alpine, install `gcompat` and compile OXC against its precompiled GNU target
+before compiling the remaining dependencies:
+
+```dockerfile
+RUN apk add --no-cache gcompat
+RUN mix deps.get
+RUN TARGET_ABI=gnu mix deps.compile oxc --include-children
+RUN mix compile
+```
+
+`TARGET_ABI` is scoped only to the OXC command. The final `mix compile` detects
+musl normally and downloads QuickBEAM's precompiled Alpine NIF, so Zig is not
+required in the image.
+
 ## Quick start
 
 ```elixir
