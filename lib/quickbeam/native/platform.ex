@@ -19,7 +19,7 @@ defmodule QuickBEAM.Native.Platform do
   def current, do: from_os_type(:os.type())
 
   @doc false
-  @spec artifact_url(String.t()) :: String.t()
+  @spec artifact_url(String.t()) :: {String.t(), [{String.t(), String.t()}]}
   def artifact_url(filename) do
     # Keep established targets on upstream artifacts while Alpine support is
     # maintained in the fork. This can return to one base URL once upstream
@@ -29,7 +29,7 @@ defmodule QuickBEAM.Native.Platform do
         do: @fork_release_url,
         else: @upstream_release_url
 
-    "#{base_url}/#{filename}"
+    {"#{base_url}/#{filename}", []}
   end
 
   @spec from_os_type(os_type()) :: t()

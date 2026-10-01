@@ -8,7 +8,8 @@ defmodule QuickBEAM.Native.PlatformTest do
     filename = "Elixir.QuickBEAM.Native-v#{version}-x86_64-linux-musl.so.tar.gz"
 
     assert Platform.artifact_url(filename) ==
-             "https://github.com/mindreframer/quickbeam/releases/download/v#{version}/#{filename}"
+             {"https://github.com/mindreframer/quickbeam/releases/download/v#{version}/#{filename}",
+              []}
   end
 
   test "keeps established artifacts on the upstream release" do
@@ -16,7 +17,8 @@ defmodule QuickBEAM.Native.PlatformTest do
     filename = "Elixir.QuickBEAM.Native-v#{version}-x86_64-linux-gnu.so.tar.gz"
 
     assert Platform.artifact_url(filename) ==
-             "https://github.com/elixir-volt/quickbeam/releases/download/v#{version}/#{filename}"
+             {"https://github.com/elixir-volt/quickbeam/releases/download/v#{version}/#{filename}",
+              []}
   end
 
   test "configures Linux native sources and flags" do
