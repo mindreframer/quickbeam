@@ -10,7 +10,7 @@ on:
       - 'lib/quickbeam/native/**'
       - 'lib/quickbeam/*.zig'
       - 'priv/c_src/**'
-      - 'scripts/smoke_precompiled.exs'
+      - 'scripts/smoke_precompiled*.exs'
       - 'mix.exs'
       - 'mix.lock'
   pull_request:
@@ -21,7 +21,7 @@ on:
       - 'lib/quickbeam/native/**'
       - 'lib/quickbeam/*.zig'
       - 'priv/c_src/**'
-      - 'scripts/smoke_precompiled.exs'
+      - 'scripts/smoke_precompiled*.exs'
       - 'mix.exs'
       - 'mix.lock'
   workflow_dispatch:
@@ -153,21 +153,46 @@ jobs:
         env:
           ALPINE_IMAGE: hexpm/elixir:1.18.3-erlang-27.3-alpine-3.21.7
         run: |
+          smoke_dir="${{ runner.temp }}/quickbeam-musl-smoke"
+          mkdir -p "$smoke_dir/lib/quickbeam/native" "$smoke_dir/artifacts" "$smoke_dir/scripts"
+          cp lib/quickbeam/native.ex "$smoke_dir/lib/quickbeam/native.ex"
+          cp lib/quickbeam/native/platform.ex "$smoke_dir/lib/quickbeam/native/platform.ex"
+          cp scripts/smoke_precompiled_native.exs "$smoke_dir/scripts/smoke.exs"
+          cp artifacts/*.tar.gz "$smoke_dir/artifacts/"
+
+          cat > "$smoke_dir/mix.exs" <<'ELIXIR'
+          defmodule QuickBEAMMuslSmoke.MixProject do
+            use Mix.Project
+
+            def project do
+              [
+                app: :quickbeam,
+                version: System.fetch_env!("QUICKBEAM_VERSION"),
+                elixir: "~> 1.15",
+                deps: [{:zigler_precompiled, "~> 0.1.6"}]
+              ]
+            end
+
+            def application, do: [extra_applications: [:logger, :inets, :ssl, :public_key]]
+          end
+          ELIXIR
+
+          quickbeam_version=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)
+
           docker run --rm --platform "${{ matrix.platform }}" \
-            -v "$GITHUB_WORKSPACE:/workspace" \
+            -v "$smoke_dir:/workspace" \
             -w /workspace \
+            -e QUICKBEAM_VERSION="$quickbeam_version" \
             -e ZIGLER_PRECOMPILED_GLOBAL_CACHE_PATH=/tmp/quickbeam-precompiled \
             "$ALPINE_IMAGE" /bin/sh -lc '
               set -eu
-              apk add --no-cache build-base git
               mix local.hex --force
               mix local.rebar --force
               mix deps.get
               mkdir -p "$ZIGLER_PRECOMPILED_GLOBAL_CACHE_PATH"
               cp artifacts/*.tar.gz "$ZIGLER_PRECOMPILED_GLOBAL_CACHE_PATH/"
-              rm -f checksum-QuickBEAM.Native.exs
               mix compile
-              mix run scripts/smoke_precompiled.exs
+              mix run scripts/smoke.exs
             '
 
   release:
