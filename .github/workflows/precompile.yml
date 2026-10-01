@@ -209,12 +209,12 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Attest Alpine build artifacts
+      - name: Attest build artifacts
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: artifacts/*-linux-musl.so.tar.gz
+          subject-path: artifacts/*.tar.gz
 
-      - name: Upload Alpine artifacts to release
+      - name: Upload artifacts to release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*-linux-musl.so.tar.gz
+          files: artifacts/*.tar.gz

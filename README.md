@@ -21,10 +21,10 @@ Windows. Source builds require Zig 0.16 and default to the build machine's CPU;
 set `QUICKBEAM_CPU=baseline` alongside `QUICKBEAM_BUILD=1` for a portable build.
 When changing CPU or optimization settings, force recompilation with `mix compile --force`.
 
-### Alpine fork
+### Maintained fork
 
-The Alpine binaries are available directly from the maintained Git fork; a Hex
-publication is not required:
+All supported precompiled binaries are available from the maintained Git fork;
+a Hex publication is not required:
 
 ```elixir
 def deps do

@@ -3,22 +3,16 @@ defmodule QuickBEAM.Native.PlatformTest do
 
   alias QuickBEAM.Native.Platform
 
-  test "routes musl artifacts to the fork release" do
+  test "routes every precompiled target to the fork release" do
     version = Mix.Project.config()[:version]
-    filename = "Elixir.QuickBEAM.Native-v#{version}-x86_64-linux-musl.so.tar.gz"
 
-    assert Platform.artifact_url(filename) ==
-             {"https://github.com/mindreframer/quickbeam/releases/download/v#{version}/#{filename}",
-              []}
-  end
+    for target <- ["x86_64-linux-musl", "x86_64-linux-gnu", "aarch64-macos-none"] do
+      filename = "Elixir.QuickBEAM.Native-v#{version}-#{target}.so.tar.gz"
 
-  test "keeps established artifacts on the upstream release" do
-    version = Mix.Project.config()[:version]
-    filename = "Elixir.QuickBEAM.Native-v#{version}-x86_64-linux-gnu.so.tar.gz"
-
-    assert Platform.artifact_url(filename) ==
-             {"https://github.com/elixir-volt/quickbeam/releases/download/v#{version}/#{filename}",
-              []}
+      assert Platform.artifact_url(filename) ==
+               {"https://github.com/mindreframer/quickbeam/releases/download/v#{version}/#{filename}",
+                []}
+    end
   end
 
   test "configures Linux native sources and flags" do
